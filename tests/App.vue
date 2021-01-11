@@ -1,7 +1,7 @@
 <template>
   <div id="app" class="full-match">
     <div class="header">
-      <h1 class="title">vis-components</h1>
+      <!-- <h1 class="title">vis-components</h1> -->
     </div>
     <div class="app">
       <div class="l-box">
