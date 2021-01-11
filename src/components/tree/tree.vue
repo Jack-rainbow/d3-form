@@ -681,7 +681,11 @@ export default {
       // 指定图表的宽高
       this.width = 700 - this.chartPadding.right - this.chartPadding.left - 180
       this.height = 700 - this.chartPadding.bottom - this.chartPadding.top - 80
-
+      // 比例尺
+      const xscale = d3.scaleBand().rangeRound([0, this.width]).padding(0.1)
+      const yscale = d3.scaleLinear().rangeRound([this.height, 0]).nice()
+      this.xscale = xscale
+      this.yscale = yscale
       d3.select('#tree-container')
         .style('width', '720px')
         .style('height', '720px')
@@ -691,28 +695,32 @@ export default {
       this.svg = d3
         .select('#tree-container')
         .append('svg')
-        .attr('viewBox', [
-          -this.margin.left,
-          -this.margin.top,
-          this.width,
-          this.dx,
-        ])
+        // .attr('viewBox', [
+        //   -this.margin.left,
+        //   -this.margin.top,
+        //   this.width,
+        //   this.dx,
+        // ])
         .style('font', '10px sans-serif')
         .style('user-select', 'none')
-
-      //   .attr('style','background: #eee')
-      //   .attr('width',700)
-      //   .attr('height',700);
+        .attr('style', 'background: #eee')
+        .attr('width', 700)
+        .attr('height', 700)
       // 添加g标签
-      this.g = this.svg
-        .append('g')
-        .attr('class', 'chart') // 图表部分
-        .attr(
-          'transform',
-          `translate(${this.chartPadding.left + 40}, ${
-            this.chartPadding.top + 40
-          })`
-        )
+      this.g = this.svg.append('g').attr('class', 'chart')
+      // .attr('viewBox', [
+      //   -this.margin.left,
+      //   -this.margin.top,
+      //   this.width,
+      //   this.dx,
+      // ])
+      // 图表部分
+      // .attr(
+      //   'transform',
+      //   `translate(${this.chartPadding.left + 40}, ${
+      //     this.chartPadding.top + 40
+      //   })`
+      // )
       // 添加图表标题
       this.title = this.svg
         .append('g')
@@ -725,8 +733,6 @@ export default {
         .attr('width', 700)
         .attr('height', `${this.titleRectHeight}`)
         .attr('fill', '#E3E3E3')
-        .attr('x', '0')
-        .attr('y', '0')
       // 标题文本
       this.title
         .append('text')
@@ -747,14 +753,16 @@ export default {
         if (abc.depth && abc.data.name.length !== 7) abc.children = null
       })
 
-      const gLink = this.svg
+      const gLink = d3
+        .select('.chart')
         .append('g')
         .attr('fill', 'none')
         .attr('stroke', '#555')
         .attr('stroke-opacity', 0.4)
         .attr('stroke-width', 1.5)
 
-      const gNode = this.svg
+      const gNode = d3
+        .select('.chart')
         .append('g')
         .attr('cursor', 'pointer')
         .attr('pointer-events', 'all')
@@ -781,16 +789,21 @@ export default {
         })
 
         const height = right.x - left.x + _that.margin.top + _that.margin.bottom
-
+        console.log(
+          -_that.margin.left,
+          left.x - _that.margin.top,
+          _that.width,
+          _that.height
+        )
         const transition = _that.svg
           .transition()
           .duration(duration)
-          .attr('viewBox', [
-            -_that.margin.left,
-            left.x - _that.margin.top,
-            _that.width,
-            _that.height,
-          ])
+          //   .attr('viewBox', [
+          //     // -_that.margin.left,
+          //     // left.x - _that.margin.top,
+          //     // _that.width,
+          //     // _that.height,
+          //   ])
           .tween(
             'resize',
             window.ResizeObserver ? null : () => () => svg.dispatch('toggle')
@@ -836,6 +849,7 @@ export default {
           .attr('transform', (d) => `translate(${d.y},${d.x})`)
           .attr('fill-opacity', 1)
           .attr('stroke-opacity', 1)
+          .attr('font-size', 10)
 
         // Transition exiting nodes to the parent's new position.
         const nodeExit = node
