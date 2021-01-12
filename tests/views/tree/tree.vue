@@ -21,54 +21,7 @@
               </div>
             </el-scrollbar>
           </el-tab-pane>
-          <!-- xAxis -->
-          <el-tab-pane label="xAxis"
-            name="third">
-            <el-scrollbar style="height: 100%">
-              <div class="form-box">
-                <HForm v-if="isInited"
-                  :formData="formConfigXAxis.formData"
-                  :items="formConfigXAxis.items"
-                  @eventdone="eventDone"></HForm>
-              </div>
-            </el-scrollbar>
-          </el-tab-pane>
-          <!-- yAxis -->
-          <el-tab-pane label="yAxis"
-            name="forth">
-            <el-scrollbar style="height: 100%">
-              <div class="form-box">
-                <HForm v-if="isInited"
-                  :formData="formConfigYAxis.formData"
-                  :items="formConfigYAxis.items"
-                  @eventdone="eventDone"></HForm>
-              </div>
-            </el-scrollbar>
-          </el-tab-pane>
-          <!-- tooltip -->
-          <el-tab-pane label="tooltip"
-            name="fifth">
-            <el-scrollbar style="height: 100%">
-              <div class="form-box">
-                <HForm v-if="isInited"
-                  :formData="formConfigTooltip.formData"
-                  :items="formConfigTooltip.items"
-                  @eventdone="eventDoneTooltip"></HForm>
-              </div>
-            </el-scrollbar>
-          </el-tab-pane>
-          <!-- legend -->
-          <el-tab-pane label="legend"
-            name="second">
-            <el-scrollbar style="height: 100%">
-              <div class="form-box">
-                <HForm v-if="isInited"
-                  :formData="formConfigLegend.formData"
-                  :items="formConfigLegend.items"
-                  @eventdone="eventDone"></HForm>
-              </div>
-            </el-scrollbar>
-          </el-tab-pane>
+
           <!-- chart -->
           <el-tab-pane label="chart"
             name="sixth">
@@ -98,6 +51,54 @@
             </el-scrollbar>
 
           </el-tab-pane>
+          <!-- xAxis -->
+          <!-- <el-tab-pane label="xAxis"
+            name="third">
+            <el-scrollbar style="height: 100%">
+              <div class="form-box">
+                <HForm v-if="isInited"
+                  :formData="formConfigXAxis.formData"
+                  :items="formConfigXAxis.items"
+                  @eventdone="eventDone"></HForm>
+              </div>
+            </el-scrollbar>
+          </el-tab-pane> -->
+          <!-- yAxis -->
+          <!-- <el-tab-pane label="yAxis"
+            name="forth">
+            <el-scrollbar style="height: 100%">
+              <div class="form-box">
+                <HForm v-if="isInited"
+                  :formData="formConfigYAxis.formData"
+                  :items="formConfigYAxis.items"
+                  @eventdone="eventDone"></HForm>
+              </div>
+            </el-scrollbar>
+          </el-tab-pane> -->
+          <!-- tooltip -->
+          <el-tab-pane label="tooltip"
+            name="fifth">
+            <el-scrollbar style="height: 100%">
+              <div class="form-box">
+                <HForm v-if="isInited"
+                  :formData="formConfigTooltip.formData"
+                  :items="formConfigTooltip.items"
+                  @eventdone="eventDoneTooltip"></HForm>
+              </div>
+            </el-scrollbar>
+          </el-tab-pane>
+          <!-- legend -->
+          <!-- <el-tab-pane label="legend"
+            name="second">
+            <el-scrollbar style="height: 100%">
+              <div class="form-box">
+                <HForm v-if="isInited"
+                  :formData="formConfigLegend.formData"
+                  :items="formConfigLegend.items"
+                  @eventdone="eventDone"></HForm>
+              </div>
+            </el-scrollbar>
+          </el-tab-pane> -->
         </el-tabs>
         <!-- 根据需要还可以添加 tooltip, 颜色列表....等 -->
       </div>
@@ -175,7 +176,7 @@ export default {
           '#F2DEAA',
         ],
         colorIndex: 0,
-        labelIsShow: true,
+        labelIsShow: false,
         labelPosition: 'top',
         scrollingIsShow: 'false',
         sortType: null,
@@ -241,8 +242,11 @@ export default {
       this.buildPropertyGroup(settingXAxis, 'formConfigXAxis')
       this.buildPropertyGroup(settingYAxis, 'formConfigYAxis')
       this.buildPropertyGroup(settingTooltip, 'formConfigTooltip')
-      this.buildPropertyGroup(settingChart, 'formConfigChart')
-
+      let chartSetting = settingChart
+      delete chartSetting.sortType
+      delete chartSetting.labelPosition
+      chartSetting.labelIsShow.default = false
+      this.buildPropertyGroup(chartSetting, 'formConfigChart')
       this.$nextTick(() => {
         this.isInited = true
       })
@@ -406,6 +410,7 @@ export default {
     },
     // chart - form配置
     eventDoneChart(data) {
+      // TODO 去除是否显示数据标签
       // 合并padding对象
       if (data.property.indexOf('Padding') !== -1) {
         const chartPadding = {
@@ -420,7 +425,7 @@ export default {
 
     // chart-改变颜色事件
     eventDoneColorList(data) {
-      this.$set(this.bindConfig, 'colorList', this.colorList)
+      this.$set(this.bindConfig, 'colorList', data)
     },
     eventDone(data) {
       this.$set(this.bindConfig, data.property, data.args)

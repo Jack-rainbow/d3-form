@@ -7,9 +7,13 @@
 /*eslint-disable */
 import * as d3 from 'd3'
 import Data from './data.json'
+import Title from './title.js'
+import Chart from './chart.js'
+import Tooltip from './tooltip.js'
 
 export default {
   name: 'Tree',
+  mixins: [Title, Chart, Tooltip],
   props: {
     options: {
       type: Object,
@@ -21,10 +25,6 @@ export default {
       tree: null,
       g: null,
       chart: null,
-      title: null,
-      titleText: 'Tree',
-      titleRectWidth: 460,
-      titleRectHeight: 40,
       width: 460,
       height: 460,
       chartPadding: { top: 80, right: 80, bottom: 80, left: 80 },
@@ -75,92 +75,6 @@ export default {
     // watch的作用可以监控一个值的变换，并调用因为变化需要执行的方法。可以通过watch动态改变关联的状态。
     // 这里是一些可被修改的配置项，例如图表标题内容、标题是否显示等
 
-    //  更改标题
-    'options.titleText': {
-      handler() {
-        this.titleText = this.options.titleText
-        this.title.select('text').text(this.titleText)
-      },
-    },
-    'options.titleIsShow': {
-      handler() {
-        if (this.options.titleIsShow) {
-          this.title.attr('style', 'display: block')
-        } else {
-          this.title.attr('style', 'display: none')
-        }
-      },
-    },
-    'options.titlePosition': {
-      handler() {
-        this.updateTitle()
-      },
-    },
-    'options.titleBackground': {
-      handler() {
-        if (this.options.titleIsShow) {
-          this.title
-            .select('rect')
-            .attr('fill', `${this.options.titleBackground}`)
-        }
-      },
-    },
-    'options.titleFontColor': {
-      handler() {
-        if (this.options.titleIsShow) {
-          this.title
-            .select('text')
-            .attr('fill', `${this.options.titleFontColor}`)
-        }
-      },
-    },
-    'options.titleTextPosition': {
-      handler() {
-        if (this.options.titleIsShow) {
-          // 修改text相对标题rect的位置,来更改文本对齐方式
-          switch (this.options.titleTextPosition) {
-            case 'center':
-              this.title
-                .select('text')
-                .attr('text-anchor', 'middle')
-                .attr('x', 350)
-              break
-            case 'left':
-              this.title
-                .select('text')
-                .attr('text-anchor', 'start')
-                .attr('x', 10)
-              break
-            case 'right':
-              this.title
-                .select('text')
-                .attr('text-anchor', 'end')
-                .attr('x', 690)
-              break
-            default:
-              break
-          }
-        }
-      },
-    },
-    'options.titleFontFamily': {
-      handler() {
-        if (this.options.titleIsShow) {
-          this.title
-            .select('text')
-            .attr('font-family', `${this.options.titleFontFamily}`)
-        }
-      },
-    },
-    'options.titleFontSize': {
-      handler() {
-        if (this.options.titleIsShow) {
-          this.title
-            .select('text')
-            .attr('font-size', `${this.options.titleFontSize}`)
-        }
-      },
-    },
     // 请根据组件需要补充...
     'options.legendIsShow': {
       handler() {
@@ -392,15 +306,17 @@ export default {
         }
       },
     },
-    'options.tooltipIsShow': {
-      handler() {
-        if (this.options.tooltipIsShow) {
-          this.tooltip.attr('style', 'display: block')
-        } else {
-          this.tooltip.attr('style', 'display: none')
-        }
-      },
-    },
+    // tooltip
+    // 'options.tooltipIsShow': {
+    //   handler() {
+    //     console.log(this.options.tooltipIsShow, 'this.options.tooltipIsShow')
+    //     if (this.options.tooltipIsShow) {
+    //       this.tooltip.attr('style', 'display: block')
+    //     } else {
+    //       this.tooltip.attr('style', 'display: none')
+    //     }
+    //   },
+    // },
     // 'options.tooltipPadding': {
     //   handler() {
     //     this.tooltipPadding = this.options.tooltipPadding
@@ -440,11 +356,11 @@ export default {
     //       )
     //   },
     // },
-    'options.tooltipColor': {
-      handler() {
-        this.tooltip.select('rect').attr('fill', this.options.tooltipColor)
-      },
-    },
+    // 'options.tooltipColor': {
+    //   handler() {
+    //     this.tooltip.select('rect').attr('fill', this.options.tooltipColor)
+    //   },
+    // },
     // 'options.tooltipBorder': {
     //   handler() {
     //     this.tooltip
@@ -452,19 +368,21 @@ export default {
     //       .attr('style', `stroke-width: ${this.options.tooltipBorder}`)
     //   },
     // },
-    'options.tooltipBorderRadius': {
-      handler() {
-        this.tooltip
-          .select('rect')
-          .attr('rx', `${this.options.tooltipBorderRadius}`)
-          .attr('ry', `${this.options.tooltipBorderRadius}`)
-      },
-    },
-    'options.chartBackground': {
-      handler() {
-        this.svg.attr('style', `background: ${this.options.chartBackground}`)
-      },
-    },
+    // 'options.tooltipBorderRadius': {
+    //   handler() {
+    //     this.tooltip
+    //       .select('rect')
+    //       .attr('rx', `${this.options.tooltipBorderRadius}`)
+    //       .attr('ry', `${this.options.tooltipBorderRadius}`)
+    //   },
+    // },
+
+    //------------
+    // 'options.chartBackground': {
+    //   handler() {
+    //     this.svg.attr('style', `background: ${this.options.chartBackground}`)
+    //   },
+    // },
     // 'options.chartPadding': {
     //   handler() {
     //     this.chartPadding = this.options.chartPadding
@@ -519,134 +437,6 @@ export default {
     //     this.updateTitle()
     //   },
     // },
-    'options.colorList': {
-      handler() {
-        for (let i = 0; i < this.data.length; i++) {
-          this.data[i].color = this.options.colorList[i]
-        }
-        this.originData = this.data
-        // 更新颜色列表后重新传入新数据
-        switch (this.options.sortType) {
-          case 'null':
-            this.chart.data(this.data)
-            break
-          case 'ascending':
-            this.chart.data(this.sortKeyAscending(this.originData))
-            break
-          case 'descending':
-            this.chart.data(this.sortKeyDescending(this.originData))
-            break
-          default:
-            break
-        }
-
-        // 更新bars和图例的颜色
-        this.chart.select('rect').attr('fill', function (item) {
-          return item.color
-        })
-        this.legend.select('rect').style('fill', function (d) {
-          return d.color
-        })
-      },
-    },
-    'options.scrollingIsShow': {
-      handler() {
-        if (this.options.scrollingIsShow) {
-          d3.select('#bar-chart-container').style('overflow', 'scroll')
-        } else {
-          d3.select('#bar-chart-container').style('overflow', 'hidden')
-        }
-      },
-    },
-    'options.scrollingWidth': {
-      handler() {
-        if (this.options.scrollingIsShow) {
-          d3.select('#bar-chart-container').style(
-            'width',
-            `${this.options.scrollingWidth}px`
-          )
-        }
-      },
-    },
-    'options.scrollingHeight': {
-      handler() {
-        if (this.options.scrollingIsShow) {
-          d3.select('#bar-chart-container').style(
-            'height',
-            `${this.options.scrollingHeight}px`
-          )
-        }
-      },
-    },
-    'options.labelIsShow': {
-      handler() {
-        if (this.options.labelIsShow) {
-          this.dataLabel.attr('style', 'display: block')
-        } else {
-          this.dataLabel.attr('style', 'display: none')
-        }
-      },
-    },
-    'options.labelPosition': {
-      handler() {
-        if (this.options.labelIsShow) {
-          this.updateDataLabel()
-        }
-      },
-    },
-    'options.sortType': {
-      handler() {
-        // 根据排序类型更新数据
-        switch (this.options.sortType) {
-          case 'null':
-            this.nameArray = this.data.map((item) => {
-              return item.name
-            })
-            this.valueArray = this.data.map((item) => {
-              return item.value
-            })
-            this.chart.data(this.data)
-            break
-          case 'ascending':
-            this.nameArray = this.ascendingData.map((item) => {
-              return item.name
-            })
-            this.valueArray = this.ascendingData.map((item) => {
-              return item.value
-            })
-            this.chart.data(this.ascendingData)
-            break
-          case 'descending':
-            this.nameArray = this.descendingData.map((item) => {
-              return item.name
-            })
-            this.valueArray = this.descendingData.map((item) => {
-              return item.value
-            })
-            this.chart.data(this.descendingData)
-            break
-          default:
-            break
-        }
-
-        // 更新排序后的x轴标签
-        this.xscale = d3
-          .scaleBand()
-          .domain(this.nameArray)
-          .rangeRound([0, this.width])
-          .padding(0.1)
-
-        // 更新图例颜色
-        // this.legend.select('rect')
-        //     .style('fill', function(d){
-        //         return d.color;
-        //     });
-
-        this.updateYAxis()
-        this.updateAxis()
-        this.updateBars()
-      },
-    },
   },
   // https://cn.vuejs.org/v2/api/#mounted
   mounted() {
@@ -676,7 +466,6 @@ export default {
     initTree() {
       // 在这里编写初始化图表的代码，以下代码仅供参考，均可调整
       // 可以使用d3绘制可视化图表，具体可参考 bar chart 示例和 README.md 中的链接
-      console.log(this.options)
 
       // 指定图表的宽高
       this.width = 700 - this.chartPadding.right - this.chartPadding.left - 180
@@ -686,61 +475,159 @@ export default {
       const yscale = d3.scaleLinear().rangeRound([this.height, 0]).nice()
       this.xscale = xscale
       this.yscale = yscale
+
+      //   -------------------------------
+      //  初始化图表宽度
       d3.select('#tree-container')
         .style('width', '720px')
         .style('height', '720px')
 
       // 添加svg
-      console.log(this.margin)
       this.svg = d3
         .select('#tree-container')
         .append('svg')
-        // .attr('viewBox', [
-        //   -this.margin.left,
-        //   -this.margin.top,
-        //   this.width,
-        //   this.dx,
-        // ])
-        .style('font', '10px sans-serif')
-        .style('user-select', 'none')
-        .attr('style', 'background: #eee')
         .attr('width', 700)
         .attr('height', 700)
+        // viewBox属性等比例缩放SVG图像
+        .attr('viewBox', '0 0 700 700')
+        .style('user-select', 'none')
+        .attr('style', 'background: #eee')
+
       // 添加g标签
-      this.g = this.svg.append('g').attr('class', 'chart')
-      // .attr('viewBox', [
-      //   -this.margin.left,
-      //   -this.margin.top,
-      //   this.width,
-      //   this.dx,
-      // ])
-      // 图表部分
-      // .attr(
-      //   'transform',
-      //   `translate(${this.chartPadding.left + 40}, ${
-      //     this.chartPadding.top + 40
-      //   })`
-      // )
-      // 添加图表标题
-      this.title = this.svg
+      this.g = this.svg
         .append('g')
-        .attr('transform', 'translate(0,0)')
-        .attr('style', 'display: none') // 默认不显示
-      // 标题背景框
-      this.title
-        .append('rect')
-        .attr('class', 'title')
-        .attr('width', 700)
-        .attr('height', `${this.titleRectHeight}`)
-        .attr('fill', '#E3E3E3')
-      // 标题文本
-      this.title
+        .attr('class', 'chart')
+
+        .attr('transform', 'translate(100,230)')
+        .style('font', '20px sans-serif')
+      // 初始化配置
+      this.initTtile()
+      this.initChart()
+      this.initTooltip()
+
+      // 初始化tootip
+      // 添加提示框
+      // 图例矩形
+      // 添加图例
+
+      // 添加数据标签
+      this.dataLabel = this.chart
         .append('text')
-        .text(this.titleText)
-        .attr('x', 350)
-        .attr('y', 25)
+        .attr('class', 'data-label')
+        .attr('font-size', 16)
         .attr('text-anchor', 'middle')
-        .attr('fill', '#000')
+        .text(function (item) {
+          return item.value
+        })
+        .attr('x', function (item) {
+          return xscale(item.name) + xscale.bandwidth() / 2
+        })
+        .attr('y', function (item) {
+          return yscale(item.value) + 16
+        })
+
+      //   // 添加提示框
+      //   this.tooltip = this.g
+      //     .append('g')
+      //     .attr('class', 'tooltip')
+      //     .attr('opacity', 0) // 默认不显示
+
+      //   this.tooltip
+      //     .append('rect')
+      //     .attr('fill', '#eeeeee')
+      //     .attr('rx', 0)
+      //     .attr('ry', 0)
+      //     .attr('stroke', 'black')
+      //     .attr('style', 'stroke-width:1')
+
+      //   this.tooltip
+      //     .append('text')
+      //     .attr('font-size', 12)
+      //     .text(function (item) {
+      //       return item
+      //     })
+      //     .attr(
+      //       'transform',
+      //       `translate(${this.tooltipPadding.left},${
+      //         this.tooltipPadding.top + 12
+      //       })`
+      //     )
+
+      //   d3.select('.tooltip').select('rect').attr('width', 75).attr('height', 23) // 为提示框设置默认尺寸
+      this.legendBox = this.g
+        .append('g')
+        .attr('style', 'display: block')
+        .attr(
+          'transform',
+          `translate(${this.width + 40},${
+            this.height / 2 - this.legendHeight / 2
+          })`
+        )
+
+      this.legend = this.legendBox
+        .selectAll('.legend')
+        .data(this.data)
+        .enter()
+        .append('g')
+        .attr('class', 'legend')
+        .attr('stroke', 'black')
+        .attr('style', 'stroke-width:0')
+        .attr('transform', function (d, i) {
+          return `translate(10, ${i * 25})`
+        })
+      // 图例文本
+      this.legend
+        .append('text')
+        .attr('transform', 'translate(50,30)')
+        .style('text-anchor', 'middle')
+        .attr('font-size', 14)
+        .text(function (d) {
+          return d.name
+        })
+      this.legend
+        .append('rect')
+        .attr('transform', 'translate(5,15)')
+        .attr('width', 20)
+        .attr('height', 20) // 设低一些就是线，高一些就是面
+        .style('fill', function (d) {
+          return d.color
+        })
+
+      // 用于取消点击图例后bar的边框效果
+      //   this.chart.on('click', function () {
+      //     d3.selectAll('.bar').attr('opacity', 1).attr('style', 'stroke-width:0')
+      //   })
+
+      // 图例点击后, 对应bar透明度增加并出现边框
+      //   let name
+      //   this.legend.on('click', function (d) {
+      //     name = d.name
+      //     d3.selectAll('.bar').attr('opacity', function (item) {
+      //       if (item.name === name) return 0.7
+      //       return 1
+      //     })
+
+      //     d3.selectAll('.bar').attr('style', function (item) {
+      //       if (item.name === name) return 'stroke-width: 2'
+      //       return 'stroke-width:0'
+      //     })
+      //   })
+
+      // bar的悬浮显示提示框
+      //   this.chart
+      //     .on('mouseover', function (d) {
+      //       const x = d3.event.layerX - 50 - chartpadding.left
+      //       const y = d3.event.layerY - chartpadding.top
+      //       d3.select('.tooltip')
+      //         .attr('transform', `translate(${x},${y})`) // 提示框跟随鼠标移动
+      //         .attr('opacity', 0.7)
+      //       d3.select('.tooltip').select('text').text(`${d.name}:${d.value}`)
+      //     })
+      //     .on('mouseout', function () {
+      //       d3.select('.tooltip').attr('opacity', 0)
+      //     })
+
+      //   -------------------------------
       // 图表
       const root = d3.hierarchy(this.data)
 
@@ -756,6 +643,7 @@ export default {
       const gLink = d3
         .select('.chart')
         .append('g')
+        .attr('class', 'line')
         .attr('fill', 'none')
         .attr('stroke', '#555')
         .attr('stroke-opacity', 0.4)
@@ -764,6 +652,8 @@ export default {
       const gNode = d3
         .select('.chart')
         .append('g')
+        // .attr('width', 700)
+        // .attr('height', 700)
         .attr('cursor', 'pointer')
         .attr('pointer-events', 'all')
       // update
@@ -789,12 +679,7 @@ export default {
         })
 
         const height = right.x - left.x + _that.margin.top + _that.margin.bottom
-        console.log(
-          -_that.margin.left,
-          left.x - _that.margin.top,
-          _that.width,
-          _that.height
-        )
+
         const transition = _that.svg
           .transition()
           .duration(duration)
@@ -820,8 +705,8 @@ export default {
           .attr('fill-opacity', 0)
           .attr('stroke-opacity', 0)
           .on('click', (event, d) => {
-            d.children = d.children ? null : d._children
-            update(d)
+            event.children = event.children ? null : event._children
+            _update(event)
           })
 
         nodeEnter
@@ -832,6 +717,7 @@ export default {
 
         nodeEnter
           .append('text')
+          .attr('class', 'textVal')
           .attr('dy', '0.31em')
           .attr('x', (d) => (d._children ? -6 : 6))
           .attr('text-anchor', (d) => (d._children ? 'end' : 'start'))
@@ -841,6 +727,17 @@ export default {
           .attr('stroke-linejoin', 'round')
           .attr('stroke-width', 3)
           .attr('stroke', 'white')
+        //   value值
+        nodeEnter
+          .append('text')
+          .attr('class', 'nodeVal')
+          .attr('dy', '0.31em')
+          .attr('x', (d) => (d._children ? -6 : 100))
+          .attr('style', 'display: none')
+          .attr('text-anchor', (d) => (d._children ? 'end' : 'start'))
+          .text((d) => d.data.value)
+          .clone(true)
+          .lower()
 
         // Transition nodes to their new position.
         const nodeUpdate = node
@@ -895,28 +792,6 @@ export default {
       _update(root)
     },
 
-    // 更改title
-    updateTitle() {
-      if (this.options.titleIsShow) {
-        // 根据设置进行对应旋转和平移
-        switch (this.options.titlePosition) {
-          case 'top':
-            this.title.attr('transform', 'rotate(0) translate(0,0)')
-            break
-          case 'bottom':
-            this.title.attr('transform', 'rotate(0) translate(0,660)')
-            break
-          case 'left':
-            this.title.attr('transform', 'translate(0,700) rotate(270)')
-            break
-          case 'right':
-            this.title.attr('transform', 'translate(700,0) rotate(90)')
-            break
-          default:
-            break
-        }
-      }
-    },
     brushed() {
       const select = d3.event.selection
       const xs = this.xscale
