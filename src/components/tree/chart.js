@@ -21,6 +21,14 @@ export default {
         };
     },
     watch: {
+        "options.chartBackground": {
+            handler() {
+                this.svg.attr(
+                    "style",
+                    `background: ${this.options.chartBackground}`
+                );
+            }
+        },
         "options.colorList": {
             handler(a) {
                 // for (let i = 0; i < this.data.length; i++) {
