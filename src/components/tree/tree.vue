@@ -504,6 +504,15 @@ export default {
       this.initTtile()
       this.initChart()
       this.initTooltip()
+      // 添加brush
+      //TODO 暂时不可行
+            // this.brush = d3.brush()
+            //     .extent([[-100, -200], [800,1000]]) // 刷选范围为图表部分
+            //     .on('brush',this.brushed);
+
+            // this.gBrush = d3.select('.chart').append('g')
+            //     .attr('class','brush')
+            //     .call(this.brush);
 
       // 初始化tootip
       // 添加提示框
@@ -657,9 +666,21 @@ export default {
         .attr('cursor', 'pointer')
         .attr('pointer-events', 'all')
       // update
-      const tree = d3.tree().nodeSize([this.dx, this.dy])
+      const tree = d3.tree()
+        // https://github.com/d3/d3/wiki/API--%E4%B8%AD%E6%96%87%E6%89%8B%E5%86%8C
+      // TODO 可修改圆点大小
+      .nodeSize([this.dx, this.dy])
+      // TODO 可布局的尺寸
+    //   .size([90,960/3])
+      // TODO 可修改间距大小
+      .separation(function separation(a, b) {
+  		return (a.parent == b.parent ? 3 : 2) / a.depth;
+ 		return (a.parent == b.parent ? 2 : 3) / a.depth;
+	    })
+
+    //   TODO 这里可区分 linkV 还是LinkH
       const diagonal = d3
-        .linkHorizontal()
+        .linkVertical()
         .x((d) => d.y)
         .y((d) => d.x)
       let _that = this
@@ -739,14 +760,18 @@ export default {
           .clone(true)
           .lower()
 
+
+
         // Transition nodes to their new position.
         const nodeUpdate = node
           .merge(nodeEnter)
           .transition(transition)
           .attr('transform', (d) => `translate(${d.y},${d.x})`)
           .attr('fill-opacity', 1)
+          .attr("class", "link")
           .attr('stroke-opacity', 1)
           .attr('font-size', 10)
+        //    .attr("d", diagonal);
 
         // Transition exiting nodes to the parent's new position.
         const nodeExit = node
@@ -796,27 +821,25 @@ export default {
       const select = d3.event.selection
       const xs = this.xscale
       const d = xs.bandwidth() / 2
+    //   console.log(this.xscale, d3.event, select);
       // 刷选中的bar透明度增加并出现边框
-      d3.selectAll('.bar')
-        .attr('opacity', function (item) {
-          const position = xs(item.name)
-          if (position + d >= select[0] && position + d <= select[1]) return 0.8
-          return 1
+      d3.selectAll('g')
+        // .attr('opacity', function (item) {
+        //   const position = xs(item.data.name)
+        //   console.log(item);
+        //   if (position + d >= select[0] && position + d <= select[1]) return 0.8
+        //   return 1
+        // })
+        .attr('style', function(item){
+            // 'color: red'
         })
-        .attr('style', function (item) {
-          const position = xs(item.name)
-          if (position + d >= select[0] && position + d <= select[1])
-            return 'stroke-width:2'
-          return 'stroke-width:0'
-        })
+        // .attr('style', function (item) {
+        //   const position = xs(item.name)
+        //   if (position + d >= select[0] && position + d <= select[1])
+        //     return 'stroke-width:2'
+        //   return 'stroke-width:0'
+        // })
 
-      // 刷选中的legend透明度增加并出现边框
-      d3.selectAll('.legend').attr('style', function (item) {
-        const position = xs(item.name)
-        if (position + d >= select[0] && position + d <= select[1])
-          return 'stroke-width:1'
-        return 'stroke-width:0'
-      })
     },
     updateAxis() {
       let ys = this.yscale

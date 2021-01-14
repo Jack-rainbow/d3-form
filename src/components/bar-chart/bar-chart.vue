@@ -64,7 +64,7 @@ export default {
     // https://cn.vuejs.org/v2/guide/computed.html#%E5%9F%BA%E7%A1%80%E4%BE%8B%E5%AD%90
     computed: {
         // 这里是一些计算属性，当其中涉及的值发生变化时，计算属性会重新计算，返回新的值
-        ascendingData(){ 
+        ascendingData(){
             // 升序排序
             return this.sortKeyAscending(this.originData,'value');
         },
@@ -74,7 +74,7 @@ export default {
         }
     },
     // https://cn.vuejs.org/v2/api/#watch
-    watch: { 
+    watch: {
         // watch的作用可以监控一个值的变换，并调用因为变化需要执行的方法。可以通过watch动态改变关联的状态。
         // 这里是一些可被修改的配置项，例如图表标题内容、标题是否显示等
         'options.titleText': {
@@ -130,7 +130,7 @@ export default {
                                         break;
                         default: break;
                     }
-                    
+
                 }
             }
         },
@@ -171,13 +171,13 @@ export default {
                         // 垂直排列
                         this.legendWidth=80;
                         this.legendHeight=170;;
-                        this.legend = this.legendBox.selectAll('.legend') 
+                        this.legend = this.legendBox.selectAll('.legend')
                                 .attr('transform', function(d, i) { return (`translate(10, ${i * 25})`); });
                     }else{
                         // 水平排列
                         this.legendWidth=430;
                         this.legendHeight=40;
-                        this.legend = this.legendBox.selectAll('.legend') 
+                        this.legend = this.legendBox.selectAll('.legend')
                                 .attr('transform', function(d, i) { return (`translate(${i * 70},0)`); });
                     }
                     // 更新图例位置
@@ -206,7 +206,7 @@ export default {
                         this.updateYAxis();
                         // 所有bar上沿对齐
                         this.chart.selectAll('.bar').attr('y', 0);
-                        
+
                     }else{
                         this.xAxis.attr('transform',`translate(0, ${this.height})`).call(d3.axisBottom(this.xscale));
                         this.xAxis.selectAll('.tick').selectAll('.axis-label')
@@ -226,7 +226,7 @@ export default {
 
                     // 更新bar对应的数据标签位置
                     this.updateDataLabel();
-                    
+
                 }
             }
         },
@@ -259,7 +259,7 @@ export default {
                 this.updateGrid();
                 if(this.options.xAxisGridIsShow){
                     this.xAxis.selectAll('.grid').attr('style', 'display: block');
-                     
+
                 }else{
                     this.xAxis.selectAll('.grid').attr('style', 'display: none');
                 }
@@ -310,7 +310,7 @@ export default {
                         this.yAxis.selectAll('.tick').selectAll('.axis-label').attr('text-anchor','start');
                         this.yAxis.selectAll('.grid').attr('x2', -this.width);
                    }
-                   
+
                 }
             }
         },
@@ -427,7 +427,7 @@ export default {
                 // 更新brush可刷选范围
                 this.brush.extent([[0, 0], [this.width, this.height]]);
                 this.gBrush.call(this.brush);
-                
+
                 // 更新图表的绘制
                 this.updateGrid();
                 this.updateBars();
@@ -499,7 +499,7 @@ export default {
         'options.labelPosition': {
             handler() {
                 if(this.options.labelIsShow){
-                    this.updateDataLabel(); 
+                    this.updateDataLabel();
                 }
             }
         },
@@ -524,18 +524,18 @@ export default {
 
                 // 更新排序后的x轴标签
                 this.xscale = d3.scaleBand().domain(this.nameArray).rangeRound([0,this.width]).padding(0.1);
-                
+
                 // 更新图例颜色
                 // this.legend.select('rect')
                 //     .style('fill', function(d){
                 //         return d.color;
                 //     });
-                
+
                 this.updateYAxis();
                 this.updateAxis();
                 this.updateBars();
-                
-                
+
+
             }
         }
 
@@ -554,7 +554,7 @@ export default {
             return array.sort(function(a,b){
                 const x = a[key];
                 const y = b[key];
-                return ((y<x)?-1:(x>y)?1:0);   
+                return ((y<x)?-1:(x>y)?1:0);
             });
         },
         initBarChart() {
@@ -570,29 +570,31 @@ export default {
 
             // 比例尺
             const xscale = d3.scaleBand().domain(this.nameArray).rangeRound([0,this.width]).padding(0.1);
+            console.log(d3.scaleBand().domain(), this.valueArray);
             const yscale = d3.scaleLinear().domain([0,d3.max(this.valueArray)*1.1]).rangeRound([this.height,0]).nice();
             this.xscale = xscale;
             this.yscale = yscale;
+            console.log(this.xscale.bandwidth());
 
             d3.select('#bar-chart-container')
                 .style('width','720px')
                 .style('height','720px');
-            
+
             // 添加svg
             this.svg = d3.select('#bar-chart-container').append('svg')
                             .attr('style','background: #eee')
                             .attr('width',700)
                             .attr('height',700);
-            // 添加g标签 
+            // 添加g标签
             this.g = this.svg.append('g')
                         .attr('class','chart')  // 图表部分
                         .attr('transform',`translate(${this.chartPadding.left+40}, ${this.chartPadding.top+40})`);
-            
+
             // 添加brush
             this.brush = d3.brushX()
                 .extent([[0, 0], [this.width, this.height]]) // 刷选范围为图表部分
                 .on('brush',this.brushed);
- 
+
             this.gBrush = d3.select('.chart').append('g')
                 .attr('class','brush')
                 .call(this.brush);
@@ -601,7 +603,7 @@ export default {
             const chartpadding = this.chartPadding;
             const chartwidth = this.width;
             const chartheight = this.height;
-            
+
             // 添加x轴
             this.xAxis=this.g.append('g')
                     .attr('class','axis')
@@ -616,7 +618,7 @@ export default {
                     .select('text')
                     .attr('class', 'axis-label');  // x轴标签
 
-            this.xAxis.selectAll('.tick') 
+            this.xAxis.selectAll('.tick')
                 .each(function(){
                         d3.select(this).append('line')
                             .attr('class','grid')    // x轴网格线
@@ -628,7 +630,7 @@ export default {
                             .attr('x2', 0)
                             .attr('y2', 0);
                 });
-            
+
             // 添加y轴
             this.yAxis=this.g.append('g')
                     .attr('class','axis')
@@ -639,7 +641,7 @@ export default {
             this.yAxis.selectAll('.tick')
                     .select('text')
                     .attr('class', 'axis-label');   // y轴标签
-            
+
             this.yAxis.selectAll('.tick')
                 .each(function(){
                         d3.select(this).append('line')
@@ -672,7 +674,7 @@ export default {
                     .attr('fill',function (item) {
                         return item.color;
                     });
-            
+
             // 添加数据标签
             this.dataLabel = this.chart.append('text')
                                     .attr('class','data-label')
@@ -687,10 +689,10 @@ export default {
                                     .attr('y', function (item) {
                                         return yscale(item.value)+16;
                                     });
-                                    
+
             // 添加提示框
             this.tooltip = this.g.append('g')
-                                .attr('class','tooltip') 
+                                .attr('class','tooltip')
                                 .attr('opacity',0); // 默认不显示
 
             this.tooltip.append('rect')
@@ -703,11 +705,11 @@ export default {
             this.tooltip.append('text')
                         .attr('font-size',12)
                         .attr('transform',`translate(${this.tooltipPadding.left},${this.tooltipPadding.top+12})`);
-                
+
             d3.select('.tooltip').select('rect')
                         .attr('width',75)
                         .attr('height',23);  // 为提示框设置默认尺寸
-            
+
             // 添加图表标题
             this.title = this.svg.append('g')
                             .attr('transform','translate(0,0)')
@@ -720,7 +722,7 @@ export default {
                     .attr('fill','#E3E3E3')
                     .attr('x','0')
                     .attr('y','0');
-            // 标题文本       
+            // 标题文本
             this.title.append('text')
                     .text(this.titleText)
                     .attr('x',350)
@@ -732,8 +734,8 @@ export default {
             this.legendBox = this.g.append('g')
                                 .attr('style', 'display: block')
                                 .attr('transform',`translate(${this.width+40},${this.height/2 - this.legendHeight/2})`);
-            
-            this.legend = this.legendBox.selectAll('.legend') 
+
+            this.legend = this.legendBox.selectAll('.legend')
                     .data(this.data)
                     .enter().append('g')
                     .attr('class', 'legend')
@@ -743,9 +745,9 @@ export default {
             // 图例文本
             this.legend.append('text')
                 .attr('transform','translate(50,30)')
-                .style('text-anchor', 'middle') 
+                .style('text-anchor', 'middle')
                 .attr('font-size',14)
-                .text(function(d) { 
+                .text(function(d) {
                     return d.name;
                 });
             // 图例矩形
@@ -762,19 +764,19 @@ export default {
                     d3.selectAll('.bar').attr('opacity', 1)
                                         .attr('style', 'stroke-width:0');
                 });
-            
+
             // 图例点击后, 对应bar透明度增加并出现边框
             let name;
             this.legend.on('click', function (d) {
                     name = d.name;
                     d3.selectAll('.bar').attr('opacity', function(item){
                                                    if(item.name === name) return 0.7;
-                                                   return 1; 
+                                                   return 1;
                                                 });
-                    
+
                     d3.selectAll('.bar').attr('style', function(item){
                                                    if(item.name === name) return 'stroke-width: 2';
-                                                   return 'stroke-width:0'; 
+                                                   return 'stroke-width:0';
                                                 });
             });
 
@@ -787,13 +789,13 @@ export default {
                         .attr('opacity',0.7);
                     d3.select('.tooltip').select('text')
                         .text(`${d.name}:${d.value}`);
-                    
+
                 })
                 .on('mouseout', function () {
                     d3.select('.tooltip')
                         .attr('opacity',0);
                 });
-            
+
         },
         brushed() {
             const select= d3.event.selection;
@@ -805,10 +807,11 @@ export default {
                                     const position =xs(item.name);
                                     if(position+d>=select[0]&& position+d<=select[1])
                                         return 0.8;
-                                    return 1; 
+                                    return 1;
                                 })
                     .attr('style',function(item){
                             const position =xs(item.name);
+                            console.log(position,'position');
                             if(position+d>=select[0]&& position+d<=select[1])
                                 return 'stroke-width:2';
                             return 'stroke-width:0';
@@ -837,7 +840,7 @@ export default {
                                     break;
                     default: break;
                 }
-                    
+
             }
         },
         updateAxis(){
@@ -861,7 +864,7 @@ export default {
                                                     });
             }
             // 更新数据标签
-            this.updateDataLabel();     
+            this.updateDataLabel();
         },
         updateYAxis(){
             if(this.options.yAxisIsShow){
@@ -879,7 +882,7 @@ export default {
                                                 break;
                             case 'scaleQuantize': if(this.options.xAxisPosition==='bottom')
                                                     this.yscale = d3.scaleQuantize().domain([0,d3.max(this.valueArray)*1.1]).range([this.height,0]).nice();
-                                                else   
+                                                else
                                                     this.yscale = d3.scaleQuantize().domain([0,d3.max(this.valueArray)*1.1]).range([0,this.height]).nice();
                                                 break;
                             case 'scaleTime': if(this.options.xAxisPosition==='bottom')
@@ -904,7 +907,7 @@ export default {
                                                 break;
                             case 'scaleQuantize': if(this.options.xAxisPosition==='bottom')
                                                     this.yscale = d3.scaleQuantize().domain([0,d3.max(this.valueArray)*1.1]).range([this.height,0]);
-                                                else   
+                                                else
                                                     this.yscale = d3.scaleQuantize().domain([0,d3.max(this.valueArray)*1.1]).range([0,this.height]);
                                                 break;
                             case 'scaleTime': if(this.options.xAxisPosition==='bottom')
