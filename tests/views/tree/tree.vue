@@ -51,30 +51,7 @@
             </el-scrollbar>
 
           </el-tab-pane>
-          <!-- xAxis -->
-          <!-- <el-tab-pane label="xAxis"
-            name="third">
-            <el-scrollbar style="height: 100%">
-              <div class="form-box">
-                <HForm v-if="isInited"
-                  :formData="formConfigXAxis.formData"
-                  :items="formConfigXAxis.items"
-                  @eventdone="eventDone"></HForm>
-              </div>
-            </el-scrollbar>
-          </el-tab-pane> -->
-          <!-- yAxis -->
-          <!-- <el-tab-pane label="yAxis"
-            name="forth">
-            <el-scrollbar style="height: 100%">
-              <div class="form-box">
-                <HForm v-if="isInited"
-                  :formData="formConfigYAxis.formData"
-                  :items="formConfigYAxis.items"
-                  @eventdone="eventDone"></HForm>
-              </div>
-            </el-scrollbar>
-          </el-tab-pane> -->
+
           <!-- tooltip -->
           <el-tab-pane label="tooltip"
             name="fifth">
@@ -87,18 +64,18 @@
               </div>
             </el-scrollbar>
           </el-tab-pane>
-          <!-- legend -->
-          <!-- <el-tab-pane label="legend"
+          <!-- size -->
+          <el-tab-pane label="size"
             name="second">
             <el-scrollbar style="height: 100%">
               <div class="form-box">
                 <HForm v-if="isInited"
-                  :formData="formConfigLegend.formData"
-                  :items="formConfigLegend.items"
+                  :formData="formConfigSize.formData"
+                  :items="formConfigSize.items"
                   @eventdone="eventDone"></HForm>
               </div>
             </el-scrollbar>
-          </el-tab-pane> -->
+          </el-tab-pane>
         </el-tabs>
         <!-- 根据需要还可以添加 tooltip, 颜色列表....等 -->
       </div>
@@ -111,12 +88,9 @@ import TestGrid from '~/tests/components/test-grid'
 import HForm from '~/tests/components/h-form'
 // 下面这里请根据你自己的开发情况import相应组件的配置项
 import settingTitle from '~/tests/setting-rules/property-setting-barchart-title'
-import settingLegend from '~/tests/setting-rules/property-setting-barchart-legend'
-import settingXAxis from '~/tests/setting-rules/property-setting-barchart-xaxis'
-import settingYAxis from '~/tests/setting-rules/property-setting-barchart-yaxis'
 import settingTooltip from '~/tests/setting-rules/property-setting-barchart-tooltip'
 import settingChart from '~/tests/setting-rules/property-setting-barchart-chart'
-
+import settingSize from '~/tests/setting-rules/property-setting-tree.setting'
 import { cloneDeep } from 'lodash'
 
 export default {
@@ -141,23 +115,6 @@ export default {
         titleFontFamily: 'Arial',
         titleFontColor: '#000',
         // ... 根据需要添加更多
-        legendIsShow: true,
-        legendPosition: 'right',
-        legendAlign: 'vertical',
-        xAxisIsShow: true,
-        xAxisTickIsShow: true,
-        xAxisLabelIsShow: true,
-        xAxisPosition: 'bottom',
-        xAxisScale: 'scaleBand',
-        xAxisNice: true,
-        xAxisGridIsShow: false,
-        yAxisIsShow: true,
-        yAxisTickIsShow: true,
-        yAxisLabelIsShow: true,
-        yAxisPosition: 'left',
-        yAxisScale: 'scaleLinear',
-        yAxisNice: true,
-        yAxisGridIsShow: true,
         tooltipIsShow: true,
         tooltipPadding: { top: 0, right: 0, bottom: 0, left: 0 },
         tooltipColor: '#eee',
@@ -167,35 +124,14 @@ export default {
         chartPadding: { top: 80, right: 80, bottom: 80, left: 80 },
         scrollingWidth: 720,
         scrollingHeight: 720,
-        colorList: [
-          '#BCA2A2',
-          '#E0B09F',
-          '#CAD9B0',
-          '#B0C4D9',
-          '#C6B0D9',
-          '#F2DEAA',
-        ],
         colorIndex: 0,
-        labelIsShow: false,
-        labelPosition: 'top',
         scrollingIsShow: 'false',
         sortType: null,
+        size: '',
       },
 
       //   右侧配置
       formConfigTitle: {
-        formData: {},
-        items: [],
-      },
-      formConfigLegend: {
-        formData: {},
-        items: [],
-      },
-      formConfigXAxis: {
-        formData: {},
-        items: [],
-      },
-      formConfigYAxis: {
         formData: {},
         items: [],
       },
@@ -204,6 +140,10 @@ export default {
         items: [],
       },
       formConfigChart: {
+        formData: {},
+        items: [],
+      },
+      formConfigSize: {
         formData: {},
         items: [],
       },
@@ -237,10 +177,8 @@ export default {
 
     initFormSetting() {
       // 初始化表单设置
-      this.buildPropertyGroup(settingTitle, 'formConfigTitle')
-      this.buildPropertyGroup(settingLegend, 'formConfigLegend')
-      this.buildPropertyGroup(settingXAxis, 'formConfigXAxis')
-      this.buildPropertyGroup(settingYAxis, 'formConfigYAxis')
+      this.buildPropertyGroup(settingTitle)
+      this.buildPropertyGroup(settingSize, 'formConfigSize')
       this.buildPropertyGroup(settingTooltip, 'formConfigTooltip')
       let chartSetting = settingChart
       delete chartSetting.sortType
@@ -251,7 +189,7 @@ export default {
         this.isInited = true
       })
     },
-    buildPropertyGroup(group, formObject = 'formConfigAxis') {
+    buildPropertyGroup(group, formObject = 'formConfigTitle') {
       Object.keys(group).forEach((property) => {
         const item = this.getFormItemFromRule(group[property], property)
         if (item) {
@@ -261,8 +199,6 @@ export default {
             property,
             group[property].default
           )
-        } else {
-          // console.error('build error', group, property)
         }
       })
     },
@@ -410,7 +346,6 @@ export default {
     },
     // chart - form配置
     eventDoneChart(data) {
-      // TODO 去除是否显示数据标签
       // 合并padding对象
       if (data.property.indexOf('Padding') !== -1) {
         const chartPadding = {

@@ -24,11 +24,14 @@ export default {
         },
         "options.titleIsShow": {
             handler() {
-                if (this.options.titleIsShow) {
-                    this.title.attr("style", "display: block");
-                } else {
-                    this.title.attr("style", "display: none");
-                }
+                this.title.attr(
+                    "style",
+                    `${
+                        this.options.titleIsShow
+                            ? "display: block"
+                            : "display: none"
+                    }`
+                );
             }
         },
         "options.titlePosition": {
