@@ -44,16 +44,14 @@ export default {
       legendBox: null,
       brush: null,
       gBrush: null,
-      legendWidth: 80,
-      legendHeight: 170,
-      xAxis: null,
-      yAxis: null,
-      xscale: null,
-      yscale: null,
-      nameArray: null,
-      valueArray: null,
       tooltipPadding: { top: 5, right: 5, bottom: 5, left: 5 },
       originData: Data,
+      diagonal: null,
+      aa: false,
+      gNode: null,
+      abc: null,
+      tree: null,
+      gLink: null,
     }
   },
   computed: {
@@ -101,14 +99,25 @@ export default {
       const yscale = d3.scaleLinear().rangeRound([this.height, 0]).nice()
       this.xscale = xscale
       this.yscale = yscale
-
       //   -------------------------------
-
       // 初始化配置
       this.initSvg()
       this.initTtile()
       this.initChart()
       this.initTooltip()
+      // TODO 框选暂时屏蔽
+      //   this.brush = d3
+      //     .brush()
+      //     .extent([
+      //       [-200, -400],
+      //       [this.width, this.height],
+      //     ]) // 刷选范围为图表部分
+      //     .on('brush', function (a) {
+      //       console.log(a)
+      //       const select = d3.event.selection
+      //       const xs = this.xscale
+      //     })
+      //   d3.select('.chart').append('g').attr('class', 'brush').call(this.brush)
 
       //   -------------------------------
       // 图表
@@ -123,7 +132,7 @@ export default {
         if (abc.depth && abc.data.name.length !== 7) abc.children = null
       })
 
-      const gLink = d3
+      this.gLink = d3
         .select('.chart')
         .append('g')
         .attr('class', 'line')
@@ -132,177 +141,203 @@ export default {
         .attr('stroke-opacity', 0.4)
         .attr('stroke-width', 1.5)
 
-      const gNode = d3
+      this.gNode = d3
         .select('.chart')
         .append('g')
         .attr('cursor', 'pointer')
         .attr('pointer-events', 'all')
+
       // update
-      const tree = d3
+      this.tree = d3
         .tree()
         // https://github.com/d3/d3/wiki/API--%E4%B8%AD%E6%96%87%E6%89%8B%E5%86%8C
-        // TODO 可修改圆点大小
         .nodeSize([this.dx, this.dy])
-        // TODO 可布局的尺寸
-        // .size([90, 960 / 3])
-        // TODO 可修改间距大小
-        .separation(function separation(a, b) {
-          return (a.parent == b.parent ? 3 : 2) / a.depth
-        })
 
-      //   TODO 这里可区分 linkV 还是LinkH
-      const diagonal = d3
+      this.diagonal = d3
         .linkVertical()
         .x((d) => d.y)
         .y((d) => d.x)
-      let _that = this
-      function _update(source) {
-        const duration = d3.event && d3.event.altKey ? 2500 : 250
-        const nodes = root.descendants().reverse()
-        const links = root.links()
 
-        // Compute the new tree layout.
-        tree(root)
-
-        let left = root
-        let right = root
-        root.eachBefore((node) => {
-          if (node.x < left.x) left = node
-          if (node.x > right.x) right = node
-        })
-
-        const height = right.x - left.x + _that.margin.top + _that.margin.bottom
-
-        const transition = _that.svg
-          .transition()
-          .duration(duration)
-          .tween(
-            'resize',
-            window.ResizeObserver ? null : () => () => svg.dispatch('toggle')
-          )
-
-        // Update the nodes…
-        const node = gNode.selectAll('g').data(nodes, (d) => d.id)
-
-        // Enter any new nodes at the parent's previous position.
-        const nodeEnter = node
-          .enter()
-          .append('g')
-          .attr('transform', (d) => `translate(${source.y0},${source.x0})`)
-          .attr('fill-opacity', 0)
-          .attr('stroke-opacity', 0)
-          .on('click', (event, d) => {
-            event.children = event.children ? null : event._children
-            _update(event)
-          })
-
-        nodeEnter
-          .append('circle')
-          .attr('r', 2.5)
-          .attr('fill', (d) => (d._children ? '#555' : '#999'))
-          .attr('stroke-width', 10)
-
-        nodeEnter
-          .append('text')
-          .attr('class', 'textVal')
-          .attr('dy', '0.31em')
-          .attr('x', (d) => (d._children ? -6 : 6))
-          .attr('text-anchor', (d) => (d._children ? 'end' : 'start'))
-          .text((d) => d.data.name)
-          .clone(true)
-          .lower()
-          .attr('stroke-linejoin', 'round')
-          .attr('stroke-width', 3)
-          .attr('stroke', 'white')
-        //   value值
-        nodeEnter
-          .append('text')
-          .attr('class', 'nodeVal')
-          .attr('dy', '0.31em')
-          .attr('x', (d) => (d._children ? -6 : 100))
-          .attr('style', 'display: none')
-          .attr('text-anchor', (d) => (d._children ? 'end' : 'start'))
-          .text((d) => d.data.value)
-          .clone(true)
-          .lower()
-
-        // Transition nodes to their new position.
-        const nodeUpdate = node
-          .merge(nodeEnter)
-          .transition(transition)
-          .attr('transform', (d) => `translate(${d.y},${d.x})`)
-          .attr('fill-opacity', 1)
-          .attr('class', 'link')
-          .attr('stroke-opacity', 1)
-          .attr('font-size', 10)
-
-        // Transition exiting nodes to the parent's new position.
-        const nodeExit = node
-          .exit()
-          .transition(transition)
-          .remove()
-          .attr('transform', (d) => `translate(${source.y},${source.x})`)
-          .attr('fill-opacity', 0)
-          .attr('stroke-opacity', 0)
-
-        // Update the links…
-        const link = gLink.selectAll('path').data(links, (d) => d.target.id)
-
-        // Enter any new links at the parent's previous position.
-        const linkEnter = link
-          .enter()
-          .append('path')
-          .attr('d', (d) => {
-            const o = { x: source.x0, y: source.y0 }
-            return diagonal({ source: o, target: o })
-          })
-
-        // Transition links to their new position.
-        link.merge(linkEnter).transition(transition).attr('d', diagonal)
-
-        // Transition exiting nodes to the parent's new position.
-        link
-          .exit()
-          .transition(transition)
-          .remove()
-          .attr('d', (d) => {
-            const o = { x: source.x, y: source.y }
-            return diagonal({ source: o, target: o })
-          })
-
-        // Stash the old positions for transition.
-        root.eachBefore((d) => {
-          d.x0 = d.x
-          d.y0 = d.y
-        })
-      }
-
-      _update(root)
+      this.initTreeNode(root)
     },
-    // 初始化tree
+    // 初始化tree 图表
     initSvg() {
       //  初始化图表宽度
-      d3.select('#tree-container')
+      const tree = d3
+        .select('#tree-container')
         .style('width', '720px')
-        .style('height', '720px')
+        .style('height', '1000px')
 
       // 添加svg
-      this.svg = d3
-        .select('#tree-container')
+      this.svg = tree
         .append('svg')
         .attr('width', 700)
-        .attr('height', 700)
+        .attr('height', 1000)
         // viewBox属性等比例缩放SVG图像
         .attr('viewBox', '0 0 1000 1000')
         .style('user-select', 'none')
         .attr('style', 'background: #eee')
+      console.log(d3.cluster(), 'currentPosition')
+      // TODO 缩放未生效
+      //   const g = this.svg.append('g')
 
-      // 添加g标签
+      //   g.selectAll('circle')
+      //     .attr('cx', ([x]) => x)
+      //     .attr('cy', ([, y]) => y)
+      //     .attr('r', 1.5)
+
+      //   d3.select('svg').call(
+      //     d3
+      //       .zoom()
+      //       .extent([
+      //         [0, 0],
+      //         [700, 700],
+      //       ])
+      //       .scaleExtent([1, 8])
+      //       .on('zoom', (transform) => {
+      //         console.log(transform, 'transform')
+      //         // g.attr('transform', transform)
+      //       })
+      //   )
+      // ---------------
+
       this.g = this.svg
         .append('g')
         .attr('class', 'chart')
         .attr('transform', 'translate(100,500)')
         .style('font', '20px sans-serif')
+    },
+    // 初始化tree -node 节点
+    initTreeNode(source) {
+      let _that = this
+      const root = d3.hierarchy(this.data)
+
+      root.x0 = this.dy / 2
+      root.y0 = 0
+      root.descendants().forEach((d, i) => {
+        const abc = d
+        abc.id = i
+        abc._children = abc.children
+        if (abc.depth && abc.data.name.length !== 7) abc.children = null
+      })
+      const duration = d3.event && d3.event.altKey ? 2500 : 250
+      const nodes = root.descendants().reverse()
+      const links = root.links()
+
+      // Compute the new tree layout.
+      this.tree(root)
+
+      let left = root
+      let right = root
+      root.eachBefore((node) => {
+        if (node.x < left.x) left = node
+        if (node.x > right.x) right = node
+      })
+
+      const height = right.x - left.x + this.margin.top + this.margin.bottom
+
+      const transition = this.svg
+        .transition()
+        .duration(duration)
+        .tween(
+          'resize',
+          window.ResizeObserver ? null : () => () => svg.dispatch('toggle')
+        )
+
+      // Update the nodes…
+      const node = this.gNode.selectAll('g').data(nodes, (d) => d.id)
+
+      // Enter any new nodes at the parent's previous position.
+      const nodeEnter = node
+        .enter()
+        .append('g')
+        .attr('transform', (d) => `translate(${source.y0},${source.x0})`)
+        .attr('fill-opacity', 0)
+        .attr('stroke-opacity', 0)
+        .on('click', (event, d) => {
+          console.log(this.initTreeNode(event))
+          event.children = event.children ? null : event._children
+        })
+
+      nodeEnter
+        .append('circle')
+        .attr('r', 2.5)
+        .attr('fill', (d) => (d._children ? '#555' : '#999'))
+        .attr('stroke-width', 10)
+
+      nodeEnter
+        .append('text')
+        .attr('class', 'textVal')
+        .attr('dy', '0.31em')
+        .attr('x', (d) => (d._children ? -6 : 6))
+        .attr('text-anchor', (d) => (d._children ? 'end' : 'start'))
+        .text((d) => d.data.name)
+        .clone(true)
+        .lower()
+        .attr('stroke-linejoin', 'round')
+        .attr('stroke-width', 3)
+        .attr('stroke', 'white')
+      //   value值
+      nodeEnter
+        .append('text')
+        .attr('class', 'nodeVal')
+        .attr('dy', '0.31em')
+        .attr('x', (d) => (d._children ? -6 : 100))
+        .attr('style', 'display: none')
+        .attr('text-anchor', (d) => (d._children ? 'end' : 'start'))
+        .text((d) => d.data.value)
+        .clone(true)
+        .lower()
+
+      // Transition nodes to their new position.
+      const nodeUpdate = node
+        .merge(nodeEnter)
+        .transition(transition)
+        .attr('transform', (d) => `translate(${d.y},${d.x})`)
+        .attr('fill-opacity', 1)
+        .attr('class', 'link')
+        .attr('stroke-opacity', 1)
+        .attr('font-size', 10)
+
+      // Transition exiting nodes to the parent's new position.
+      const nodeExit = node
+        .exit()
+        .transition(transition)
+        .remove()
+        .attr('transform', (d) => `translate(${source.y},${source.x})`)
+        .attr('fill-opacity', 0)
+        .attr('stroke-opacity', 0)
+
+      // Update the links…
+      const link = this.gLink.selectAll('path').data(links, (d) => d.target.id)
+
+      // Enter any new links at the parent's previous position.
+      const linkEnter = link
+        .enter()
+        .append('path')
+        .attr('d', (d) => {
+          const o = { x: source.x0, y: source.y0 }
+          return this.diagonal({ source: o, target: o })
+        })
+
+      // Transition links to their new position.
+      link.merge(linkEnter).transition(transition).attr('d', this.diagonal)
+
+      // Transition exiting nodes to the parent's new position.
+      link
+        .exit()
+        .transition(transition)
+        .remove()
+        .attr('d', (d) => {
+          const o = { x: source.x, y: source.y }
+          return this.diagonal({ source: o, target: o })
+        })
+
+      // Stash the old positions for transition.
+      root.eachBefore((d) => {
+        d.x0 = d.x
+        d.y0 = d.y
+      })
     },
   },
 }

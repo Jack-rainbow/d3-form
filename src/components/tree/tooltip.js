@@ -41,7 +41,7 @@ export default {
                 // 修改鼠标悬浮事件
                 this.chart.on("mouseover", function(d) {
                     const x = d3.event.layerX - 70 - chartpadding.left;
-                    const y = d3.event.layerY - 360;
+                    const y = d3.event.layerY - 500;
                     d3.select(".tooltip")
                         .attr("transform", `translate(${x},${y})`)
                         .attr("opacity", 0.7);
@@ -133,7 +133,7 @@ export default {
                     const _text = d3.event.target.textContent;
                     if (d3.event.target.nodeName === "text") {
                         const x = d3.event.layerX - 70;
-                        const y = d3.event.layerY - 360;
+                        const y = d3.event.layerY - 500;
                         d3.select(".tooltip")
                             .attr("opacity", "0.7")
                             .attr("transform", `translate(${x},${y})`)
