@@ -40,8 +40,8 @@ export default {
 
                 // 修改鼠标悬浮事件
                 this.chart.on("mouseover", function(d) {
-                    const x = d3.event.layerX - 10 - chartpadding.left;
-                    const y = d3.event.layerY - 230;
+                    const x = d3.event.layerX - 70 - chartpadding.left;
+                    const y = d3.event.layerY - 360;
                     d3.select(".tooltip")
                         .attr("transform", `translate(${x},${y})`)
                         .attr("opacity", 0.7);
@@ -99,7 +99,6 @@ export default {
     },
     methods: {
         initTooltip() {
-            let _that = this;
             // 添加提示框
             this.tooltip = this.g
                 .append("g")
@@ -117,9 +116,6 @@ export default {
             this.tooltip
                 .append("text")
                 .attr("font-size", 12)
-                .text(function() {
-                    return 2222;
-                })
                 .attr(
                     "transform",
                     `translate(${this.tooltipPadding.left},${this.tooltipPadding
@@ -136,9 +132,8 @@ export default {
                 .on("mouseover", function() {
                     const _text = d3.event.target.textContent;
                     if (d3.event.target.nodeName === "text") {
-                        const x =
-                            d3.event.layerX - 10 - _that.chartpadding.left;
-                        const y = d3.event.layerY - 230;
+                        const x = d3.event.layerX - 70;
+                        const y = d3.event.layerY - 360;
                         d3.select(".tooltip")
                             .attr("opacity", "0.7")
                             .attr("transform", `translate(${x},${y})`)

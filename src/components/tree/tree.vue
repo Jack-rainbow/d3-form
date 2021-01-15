@@ -293,7 +293,7 @@ export default {
         .attr('width', 700)
         .attr('height', 700)
         // viewBox属性等比例缩放SVG图像
-        .attr('viewBox', '0 0 700 700')
+        .attr('viewBox', '0 0 1000 1000')
         .style('user-select', 'none')
         .attr('style', 'background: #eee')
 
@@ -301,8 +301,7 @@ export default {
       this.g = this.svg
         .append('g')
         .attr('class', 'chart')
-
-        .attr('transform', 'translate(100,230)')
+        .attr('transform', 'translate(100,500)')
         .style('font', '20px sans-serif')
     },
   },
