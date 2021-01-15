@@ -26,6 +26,7 @@ export default {
     size: {
         type: "enum",
         title: "布局尺寸",
+        default: [20, 20],
         values: numVal.map(v => {
             return String([v, v * 10]);
         })
@@ -50,5 +51,10 @@ export default {
         title: "文字间距",
         default: -6,
         values: [-6, 50]
+    },
+    sort: {
+        type: "boolean",
+        title: "是否排序",
+        default: false
     }
 };

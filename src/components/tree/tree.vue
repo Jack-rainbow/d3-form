@@ -52,6 +52,7 @@ export default {
       abc: null,
       tree: null,
       gLink: null,
+      root: null,
     }
   },
   computed: {
@@ -121,11 +122,11 @@ export default {
 
       //   -------------------------------
       // 图表
-      const root = d3.hierarchy(this.data)
+      this.root = d3.hierarchy(this.data)
 
-      root.x0 = this.dy / 2
-      root.y0 = 0
-      root.descendants().forEach((d, i) => {
+      this.root.x0 = this.dy / 2
+      this.root.y0 = 0
+      this.root.descendants().forEach((d, i) => {
         const abc = d
         abc.id = i
         abc._children = abc.children
@@ -158,7 +159,7 @@ export default {
         .x((d) => d.y)
         .y((d) => d.x)
 
-      this.initTreeNode(root)
+      this.initTreeNode(this.root)
     },
     // 初始化tree 图表
     initSvg() {
@@ -177,6 +178,7 @@ export default {
         .attr('viewBox', '0 0 1000 1000')
         .style('user-select', 'none')
         .attr('style', 'background: #eee')
+
       console.log(d3.cluster(), 'currentPosition')
       // TODO 缩放未生效
       //   const g = this.svg.append('g')
@@ -210,26 +212,32 @@ export default {
     // 初始化tree -node 节点
     initTreeNode(source) {
       let _that = this
-      const root = d3.hierarchy(this.data)
+      this.root = d3.hierarchy(this.data)
 
-      root.x0 = this.dy / 2
-      root.y0 = 0
-      root.descendants().forEach((d, i) => {
+      this.root.x0 = this.dy / 2
+      this.root.y0 = 0
+      this.root.descendants().forEach((d, i) => {
         const abc = d
         abc.id = i
         abc._children = abc.children
         if (abc.depth && abc.data.name.length !== 7) abc.children = null
       })
+      this.options.sort &&
+        this.root
+          .sum((d) => d.value)
+          .sort((a, b) => {
+            return b.value - a.value
+          })
       const duration = d3.event && d3.event.altKey ? 2500 : 250
-      const nodes = root.descendants().reverse()
-      const links = root.links()
+      const nodes = this.root.descendants().reverse()
+      const links = this.root.links()
 
       // Compute the new tree layout.
-      this.tree(root)
+      this.tree(this.root)
 
-      let left = root
-      let right = root
-      root.eachBefore((node) => {
+      let left = this.root
+      let right = this.root
+      this.root.eachBefore((node) => {
         if (node.x < left.x) left = node
         if (node.x > right.x) right = node
       })
@@ -334,7 +342,7 @@ export default {
         })
 
       // Stash the old positions for transition.
-      root.eachBefore((d) => {
+      this.root.eachBefore((d) => {
         d.x0 = d.x
         d.y0 = d.y
       })

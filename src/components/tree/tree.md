@@ -16,3 +16,7 @@
 
 -   d3.svg.diagonal – create a new diagonal generator 创建一个新的对角发生器
 -   diagonal.projection – get or set an optional point transform 获取或设置一个任意变换点
+
+### api
+
+https://github.com/d3/d3/blob/master/API.md#chords-d3-chord
