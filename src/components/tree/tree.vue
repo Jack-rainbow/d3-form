@@ -180,16 +180,7 @@ export default {
     // 初始化tree -node 节点
     initTreeNode(source) {
       let _that = this
-      this.root = d3.hierarchy(this.data)
 
-      this.root.x0 = this.dy / 2
-      this.root.y0 = 0
-      this.root.descendants().forEach((d, i) => {
-        const abc = d
-        abc.id = i
-        abc._children = abc.children
-        if (abc.depth && abc.data.name.length !== 7) abc.children = null
-      })
       this.options.sort &&
         this.root
           .sum((d) => d.value)
@@ -205,10 +196,6 @@ export default {
 
       let left = this.root
       let right = this.root
-      this.root.eachBefore((node) => {
-        if (node.x < left.x) left = node
-        if (node.x > right.x) right = node
-      })
 
       const height = right.x - left.x + this.margin.top + this.margin.bottom
 
@@ -319,7 +306,6 @@ export default {
         d.children = d._children
         d._children = null
       }
-      console.log(d.children, 'd.children', d)
       this.initTreeNode(d)
     },
   },
