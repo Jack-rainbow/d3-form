@@ -30,23 +30,6 @@ export default {
         "options.nodeSize": {
             handler(a) {
                 d3.selectAll("circle").attr("r", a);
-                const { tree } = this;
-                console.log(this.layoutType);
-
-                // TODO 上下切换没实现
-                this.layoutType.size(
-                    tree,
-                    {
-                        width: 700,
-                        height: 700
-                    },
-                    {
-                        x: 100,
-                        y: 50
-                    },
-                    { first: 100, last: 200 }
-                );
-                console.log(this.layoutType, "this.layout");
             }
         },
         // 指定在 x 和 y 的布局尺寸
@@ -59,14 +42,8 @@ export default {
         },
         //获取或设置相邻节点之间的间距的函数
         "options.separation": {
-            handler(a) {
-                // console.log(a);
-                // TODO 有问题
-                // this.tree = d3.tree().separation(function separation(a, b) {
-                //     console.log(a, b);
-                //     return a.parent == b.parent ? 200 : 800;
-                // });
-                // this.initTreeNode();
+            handler() {
+                this.initTreeNode();
             }
         },
         "options.position": {

@@ -37,8 +37,6 @@ export default {
       },
       dx: 10,
       dy: 159.16666666666666,
-
-      // 。。。。。
       legend: null,
       tooltip: null,
       legendBox: null,
@@ -106,20 +104,6 @@ export default {
       this.initTtile()
       this.initChart()
       this.initTooltip()
-      // TODO 框选暂时屏蔽
-      //   this.brush = d3
-      //     .brush()
-      //     .extent([
-      //       [-200, -400],
-      //       [this.width, this.height],
-      //     ]) // 刷选范围为图表部分
-      //     .on('brush', function (a) {
-      //       console.log(a)
-      //       const select = d3.event.selection
-      //       const xs = this.xscale
-      //     })
-      //   d3.select('.chart').append('g').attr('class', 'brush').call(this.brush)
-
       //   -------------------------------
       // 图表
       this.root = d3.hierarchy(this.data)
@@ -153,6 +137,13 @@ export default {
         .tree()
         // https://github.com/d3/d3/wiki/API--%E4%B8%AD%E6%96%87%E6%89%8B%E5%86%8C
         .nodeSize([this.dx, this.dy])
+        .separation((a, b) => {
+          return a.parent == b.parent
+            ? this.options.separation
+              ? this.options.separation
+              : 1
+            : 2
+        })
 
       this.diagonal = d3
         .linkVertical()
@@ -163,45 +154,21 @@ export default {
     },
     // 初始化tree 图表
     initSvg() {
+      let x0 = Infinity
+      let x1 = x0
+
       //  初始化图表宽度
-      const tree = d3
-        .select('#tree-container')
-        .style('width', '720px')
-        .style('height', '1000px')
+      const tree = d3.select('#tree-container')
 
       // 添加svg
       this.svg = tree
         .append('svg')
         .attr('width', 700)
-        .attr('height', 1000)
+        .attr('height', 700)
         // viewBox属性等比例缩放SVG图像
-        .attr('viewBox', '0 0 1000 1000')
+        .attr('viewBox', [0, 0, 700, 700])
         .style('user-select', 'none')
         .attr('style', 'background: #eee')
-
-      console.log(d3.cluster(), 'currentPosition')
-      // TODO 缩放未生效
-      //   const g = this.svg.append('g')
-
-      //   g.selectAll('circle')
-      //     .attr('cx', ([x]) => x)
-      //     .attr('cy', ([, y]) => y)
-      //     .attr('r', 1.5)
-
-      //   d3.select('svg').call(
-      //     d3
-      //       .zoom()
-      //       .extent([
-      //         [0, 0],
-      //         [700, 700],
-      //       ])
-      //       .scaleExtent([1, 8])
-      //       .on('zoom', (transform) => {
-      //         console.log(transform, 'transform')
-      //         // g.attr('transform', transform)
-      //       })
-      //   )
-      // ---------------
 
       this.g = this.svg
         .append('g')
@@ -209,6 +176,7 @@ export default {
         .attr('transform', 'translate(100,500)')
         .style('font', '20px sans-serif')
     },
+
     // 初始化tree -node 节点
     initTreeNode(source) {
       let _that = this
@@ -251,7 +219,6 @@ export default {
           'resize',
           window.ResizeObserver ? null : () => () => svg.dispatch('toggle')
         )
-
       // Update the nodes…
       const node = this.gNode.selectAll('g').data(nodes, (d) => d.id)
 
@@ -262,10 +229,7 @@ export default {
         .attr('transform', (d) => `translate(${source.y0},${source.x0})`)
         .attr('fill-opacity', 0)
         .attr('stroke-opacity', 0)
-        .on('click', (event, d) => {
-          console.log(this.initTreeNode(event))
-          event.children = event.children ? null : event._children
-        })
+        .on('click', this.click)
 
       nodeEnter
         .append('circle')
@@ -346,6 +310,17 @@ export default {
         d.x0 = d.x
         d.y0 = d.y
       })
+    },
+    click(d) {
+      if (d.children) {
+        d._children = d.children
+        d.children = null
+      } else {
+        d.children = d._children
+        d._children = null
+      }
+      console.log(d.children, 'd.children', d)
+      this.initTreeNode(d)
     },
   },
 }
